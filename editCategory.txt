@@ -1,0 +1,58 @@
+<?php
+    session_start();
+
+    require_once "header.php";
+    require_once "navigation.php";
+?>
+
+<?php
+
+    if(isset($_POST["categoryName"]))
+    {
+        require_once "connection.php";
+
+        $sql = "UPDATE category
+                SET cat_name = :cname
+                WHERE id = :id ;";
+        
+        $sth = $con->prepare($sql);
+        $sth->bindParam(':id', $_SESSION["catId"]);
+        $sth->bindParam(':cname', $_POST["categoryName"]);
+
+        $sth->execute();
+
+        header("location:viewCategories.php");
+        exit();        
+    }
+
+    require_once "connection.php";
+
+    $sql = "SELECT cat_name FROM category WHERE id = " . $_GET["id"] . ";";
+    
+    $sth = $con->prepare($sql);
+    $sth->execute();
+    $result = $sth->fetchAll(PDO::FETCH_ASSOC);
+
+    $catName = $result[0]["cat_name"];
+    
+    $_SESSION["catId"] = $_GET["id"];
+?>
+
+<div class="container">
+    <h2>Kategorie editieren</h2>
+    <form class="form-horizontal" action="editCategory.php" method="post" id="editCategoryForm">
+        <div class="form-group">
+            <label class="control-label col-sm-2" for="categoryName">Name:</label>
+            <div class="col-sm-3">
+                <input type="text" class="form-control" id="categoryName" value="<?php echo $catName; ?>" name="categoryName" required>
+            </div>
+        </div>
+        <div class="form-group">        
+            <div class="col-sm-offset-2 col-sm-10">
+                <button type="submit" class="btn btn-default">&Auml;ndern</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<?php require_once "footer.php"; ?>
